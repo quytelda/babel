@@ -43,7 +43,7 @@ main = do
 
   -- parse pattern
   let pattern = splitBy ':' (args !! 0)
-  m <- loadDefs "babel.conf"
+  m <- loadDefs "babel.defs"
 
   results <- (replicateM 5 (generate pattern m))
   mapM putStrLn (map concat results)
@@ -70,11 +70,12 @@ loadDefs path = do
       map (trimSnd.break ( == '=')) (lines contents)
     else
     return default_defs
-    where
-      trimSnd (first, second) = (first, tail second)
+  where
+    trimSnd (first, second) = (first, tail second)
 
 
 splitBy :: Char -> String -> [String]
+-- ^Use a character delimiter to split a String into smaller components
 splitBy _ [] = []
 splitBy del xs = front : splitBy del (tail' back)
   where
@@ -88,6 +89,7 @@ generate pattern m = mapM (\k -> substitute k m) pattern
 
 
 substitute :: String -> Map.Map String String -> IO String
+-- ^Look up a random substitute for the provided key in the key/value map.
 substitute k m =
   case (Map.lookup k m) of
   (Just value) -> do
@@ -98,6 +100,7 @@ substitute k m =
 
 
 selectRandom :: [a] -> IO a
+-- ^Pick a random item from a list
 selectRandom list = do
   i <- randomRIO (0, max)
   return (list !! i)
