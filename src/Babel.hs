@@ -24,9 +24,12 @@ import System.Environment
 import System.Exit
 import System.IO
 import System.Random
+import System.Directory
 
 import qualified Data.Map as Map
 import Control.Monad(when, mapM, replicateM)
+
+default_defs = Map.fromList[("UC", ['A'..'Z']), ("LC", ['a'..'z']), ("D", ['0'..'9'])]
 
 main :: IO ()
 main = do
@@ -40,7 +43,7 @@ main = do
 
   -- parse pattern
   let pattern = splitBy ':' (args !! 0)
-  let m = Map.fromList[("UC", ['A'..'Z']), ("LC", ['a'..'z']), ("D", ['0'..'9'])]
+  m <- loadDefs "babel.conf"
 
   results <- (replicateM 5 (generate pattern m))
   mapM putStrLn (map concat results)
@@ -57,6 +60,20 @@ help = do
   putStrLn "-c\t--config <path>\tUse config file at <path>."
 
 
+loadDefs :: FilePath -> IO (Map.Map String String)
+loadDefs path = do
+  exists <- doesFileExist path
+
+  if exists then do
+    contents <- openFile path ReadMode >>= hGetContents
+    return $ Map.fromList $
+      map (trimSnd.break ( == '=')) (lines contents)
+    else
+    return default_defs
+    where
+      trimSnd (first, second) = (first, tail second)
+
+
 splitBy :: Char -> String -> [String]
 splitBy _ [] = []
 splitBy del xs = front : splitBy del (tail' back)
@@ -69,6 +86,7 @@ splitBy del xs = front : splitBy del (tail' back)
 generate :: [String] -> Map.Map String String -> IO [String]
 generate pattern m = mapM (\k -> substitute k m) pattern
 
+
 substitute :: String -> Map.Map String String -> IO String
 substitute k m =
   case (Map.lookup k m) of
@@ -77,6 +95,7 @@ substitute k m =
     return [elem]
   (Nothing) -> do
     return ""
+
 
 selectRandom :: [a] -> IO a
 selectRandom list = do
