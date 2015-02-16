@@ -21,6 +21,7 @@
 module Main where
 
 import System.Environment
+import System.Console.GetOpt
 import System.Exit
 import System.IO
 import System.Random
@@ -38,7 +39,7 @@ main = do
   args <- getArgs
   when (length args < 1) $ do
     hPutStrLn stderr "Not enough arguments."
-    help
+    usage
     exitFailure
 
   -- parse pattern
@@ -51,16 +52,12 @@ main = do
   return ()
 
 
-help :: IO ()
-help = do
-  putStrLn "Usage: babel [options] <pattern>"
-  putStrLn "\nOptions:"
-  putStrLn "-h\t--help\tShow this information"
-  putStrLn "-n <N>\t\tGenerate <N> sequences."
-  putStrLn "-c\t--config <path>\tUse config file at <path>."
+usage :: IO ()
+usage = putStrLn "Usage: babel [options] <pattern>"
 
 
 loadDefs :: FilePath -> IO (Map.Map String String)
+-- ^Load custom sequence pattern definitions from a file.
 loadDefs path = do
   exists <- doesFileExist path
 
@@ -85,18 +82,29 @@ splitBy del xs = front : splitBy del (tail' back)
 
 
 generate :: [String] -> Map.Map String String -> IO [String]
+-- ^use the provided pattern to randomly generate a matching sequence.
 generate pattern m = mapM (\k -> substitute k m) pattern
 
 
 substitute :: String -> Map.Map String String -> IO String
 -- ^Look up a random substitute for the provided key in the key/value map.
-substitute k m =
-  case (Map.lookup k m) of
-  (Just value) -> do
-    elem <- selectRandom value
-    return [elem]
-  (Nothing) -> do
-    return ""
+substitute k m
+  | (head k == '(' && last k == ')') = do
+      include <- chance
+
+      if include then
+        substitute (tail (init k)) m
+      else
+        return ""
+  | otherwise =
+      case (Map.lookup k m) of
+       (Just value) -> do
+         elem <- selectRandom value
+         return [elem]
+       (Nothing) -> do
+         return ""
+  where
+    chance = randomIO :: IO Bool
 
 
 selectRandom :: [a] -> IO a
