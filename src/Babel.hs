@@ -28,7 +28,7 @@ import System.Random
 import System.Directory
 
 import qualified Data.Map as Map
-import Control.Monad(when, mapM, replicateM)
+import Control.Monad(when, mapM, replicateM, filterM)
 
 default_defs = Map.fromList[("UC", ['A'..'Z']), ("LC", ['a'..'z']), ("D", ['0'..'9'])]
 
@@ -44,7 +44,7 @@ main = do
 
   -- parse pattern
   let pattern = splitBy ':' (args !! 0)
-  m <- loadDefs "babel.defs"
+  m <- loadDefs "babel.conf"
 
   results <- (replicateM 5 (generate pattern m))
   mapM putStrLn (map concat results)
@@ -63,8 +63,10 @@ loadDefs path = do
 
   if exists then do
     contents <- openFile path ReadMode >>= hGetContents
+    let values = map (trimSnd . break ( == '=')) (lines contents)
     return $ Map.fromList $
-      map (trimSnd.break ( == '=')) (lines contents)
+      filter (\e -> not $ null (fst e) || null (snd e)) values
+
     else
     return default_defs
   where
@@ -94,7 +96,7 @@ substitute k m
 
       if include then
         substitute (tail (init k)) m
-      else
+        else
         return ""
   | otherwise =
       case (Map.lookup k m) of
@@ -102,7 +104,8 @@ substitute k m
          elem <- selectRandom value
          return [elem]
        (Nothing) -> do
-         return ""
+         hPutStrLn stderr "Invalid key."
+         exitFailure
   where
     chance = randomIO :: IO Bool
 
