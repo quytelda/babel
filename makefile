@@ -1,7 +1,7 @@
 EXENAME=babel
 SRCDIR=src
 
-babel:
+babel: ${SRCDIR}/Babel.hs
 	ghc --make -o ${EXENAME} ${SRCDIR}/Babel.hs
 
 clean:
