@@ -67,8 +67,10 @@ loadDefs path = do
 
     pairs <- mapM (\line -> case parse line of
                  (Just p) -> return p
-                 (Nothing) -> hPutStrLn stderr ("** warning: Invalid assignment will be ignored (\"" ++ line ++ "\")") >>
-                              return ("", "")
+                 (Nothing) ->
+                   hPutStrLn stderr
+                   ("** warning (" ++ path ++ "): Invalid assignment (\"" ++ line ++ "\")") >>
+                   return ("", "")
          )
       (lines contents)
 
@@ -103,6 +105,7 @@ generate pattern m = mapM (\k -> substitute k m) pattern
 substitute :: String -> Map.Map String String -> IO String
 -- ^Look up a random substitute for the provided key in the key/value map.
 substitute k m
+  | null k = return ""
   | (head k == '(' && last k == ')') = do
       include <- chance
 
