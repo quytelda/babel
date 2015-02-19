@@ -28,6 +28,7 @@ import System.Random
 import System.Directory
 
 import qualified Data.Map as Map
+import Data.Text(pack, unpack, strip)
 import Control.Monad(when, mapM, replicateM, filterM)
 
 default_defs = Map.fromList[("UC", ['A'..'Z']), ("LC", ['a'..'z']), ("D", ['0'..'9'])]
@@ -59,19 +60,30 @@ usage = putStrLn "Usage: babel [options] <pattern>"
 loadDefs :: FilePath -> IO (Map.Map String String)
 -- ^Load custom sequence pattern definitions from a file.
 loadDefs path = do
-  exists <- doesFileExist path
+  fileExists <- doesFileExist path
 
-  if exists then do
+  if fileExists then do
     contents <- openFile path ReadMode >>= hGetContents
-    let values = map (trimSnd . break ( == '=')) (lines contents)
-    return $ Map.fromList $
-      filter (\e -> not $ null (fst e) || null (snd e)) values
 
+    pairs <- mapM (\line -> case parse line of
+                 (Just p) -> return p
+                 (Nothing) -> hPutStrLn stderr ("** warning: Invalid assignment will be ignored (\"" ++ line ++ "\")") >>
+                              return ("", "")
+         )
+      (lines contents)
+
+    return (Map.fromList pairs)
     else
     return default_defs
-  where
-    trimSnd (first, second) = (first, tail second)
 
+parse :: String -> Maybe (String, String)
+parse line =
+  case (break ( == '=') line) of
+   ("", _) -> Nothing
+   (_, "") -> Nothing
+   (s, t) -> Just (trim s, tail $ trim t)
+  where
+    trim = unpack . strip . pack
 
 splitBy :: Char -> String -> [String]
 -- ^Use a character delimiter to split a String into smaller components
@@ -104,7 +116,7 @@ substitute k m
          elem <- selectRandom value
          return [elem]
        (Nothing) -> do
-         hPutStrLn stderr "Invalid key."
+         hPutStrLn stderr $ "Invalid key: " ++ k
          exitFailure
   where
     chance = randomIO :: IO Bool
