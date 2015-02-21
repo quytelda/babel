@@ -1,0 +1,2 @@
+# Babel
+Babel is a small utility written in Haskell that generates randomized sequences based on configurable parameters.  It can be used for password generation, word generation, and similar applications.
