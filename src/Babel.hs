@@ -33,6 +33,31 @@ import Control.Monad(when, mapM, replicateM, filterM)
 
 default_defs = Map.fromList[("UC", ['A'..'Z']), ("LC", ['a'..'z']), ("D", ['0'..'9'])]
 
+data Options = Options { optHelp :: Bool
+                       , optQuiet :: Bool
+                       , optNumber :: Int
+                       , optOutput :: (String -> IO ())
+                       , optConfig :: FilePath
+                       }
+
+defaults :: Options
+defaults = Options { optHelp = False
+                   , optQuiet = False
+                   , optNumber = 1
+                   , optOutput = putStrLn
+                   , optConfig = "./babel.defs"
+                   }
+
+options :: [OptDescr (Options -> Options)]
+options =
+  [ Option ['h'] ["help"] (NoArg (\opt -> opt {optHelp = True}))
+    "Display help message."
+  , Option ['q'] ["quit"] (NoArg (\opt -> opt {optQuiet = True}))
+    "Supress output."
+  , Option ['n'] [] (ReqArg (\str opt -> opt {optNumber = (read str :: Int)}) "N")
+    "Generate N sequences."
+  ]
+
 main :: IO ()
 main = do
 
@@ -42,6 +67,9 @@ main = do
     hPutStrLn stderr "Not enough arguments."
     usage
     exitFailure
+
+  let (actions, params, errs) = getOpt RequireOrder options args
+      opts = foldl ( . ) id actions
 
   -- parse pattern
   let pattern = splitBy ':' (args !! 0)
