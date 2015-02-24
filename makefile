@@ -2,7 +2,7 @@ EXENAME=babel
 SRCDIR=src
 
 babel: ${SRCDIR}/Babel.hs
-	ghc --make -o ${EXENAME} ${SRCDIR}/Babel.hs
+	ghc --make -Wall -i${SRCDIR} -o ${EXENAME} ${SRCDIR}/Babel.hs
 
 clean:
 	rm babel
