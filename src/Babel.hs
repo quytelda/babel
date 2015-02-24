@@ -2,31 +2,33 @@ module Main where
 
 import System.IO
 import System.Environment
+import System.Exit
 import System.Console.GetOpt
+
+import Control.Monad(when)
 
 import qualified Data.Map as Map
 
+-- |The Options structure holds the results of parsed command-line arguments
 data Options = Options { optHelp :: Bool
-                       , optQuiet :: Bool
                        , optNumber :: Int
                        , optOutput :: (String -> IO ())
                        , optDefFile :: FilePath
                        }
 
+-- |The default runtime configuration
 defaults :: Options
 defaults = Options { optHelp = False
-                   , optQuiet = False
                    , optNumber = 1
                    , optOutput = putStrLn
                    , optDefFile = "./babel.defs"
                    }
 
+-- |options describes the supported command-line arguments
 options :: [OptDescr (Options -> Options)]
 options =
   [ Option ['h'] ["help"] (NoArg (\opt -> opt {optHelp = True}))
     "Display help message."
-  , Option ['q'] ["quit"] (NoArg (\opt -> opt {optQuiet = True}))
-    "Supress output."
   , Option ['n'] [] (ReqArg (\str opt -> opt {optNumber = (read str :: Int)}) "N")
     "Generate N sequences."
   , Option ['d'] ["defs"] (ReqArg (\str opt -> opt {optDefFile = str}) "FILE")
@@ -40,13 +42,20 @@ options =
       hPutStrLn handle str
       hClose handle
 
+-- Entry Point
 main :: IO ()
 main = do
   args <- getArgs
 
   let (actions, params, errs) = getOpt RequireOrder options args
+      getOptions = foldl ( . ) id actions
+      Options { optHelp = help
+              , optOutput = output
+              } = getOptions defaults
 
-  let opts = foldl ( . ) id actions
+  when help $ do
+    putStrLn $ usageInfo header options
+    exitSuccess
 
   return ()
   where
