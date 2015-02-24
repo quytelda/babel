@@ -10,15 +10,17 @@ data Options = Options { optHelp :: Bool
                        , optQuiet :: Bool
                        , optNumber :: Int
                        , optOutput :: (String -> IO ())
-                       , optConfig :: FilePath
+                       , optDefFile :: FilePath
                        }
+
 defaults :: Options
 defaults = Options { optHelp = False
                    , optQuiet = False
                    , optNumber = 1
                    , optOutput = putStrLn
-                   , optConfig = "./babel.defs"
+                   , optDefFile = "./babel.defs"
                    }
+
 options :: [OptDescr (Options -> Options)]
 options =
   [ Option ['h'] ["help"] (NoArg (\opt -> opt {optHelp = True}))
@@ -27,7 +29,16 @@ options =
     "Supress output."
   , Option ['n'] [] (ReqArg (\str opt -> opt {optNumber = (read str :: Int)}) "N")
     "Generate N sequences."
+  , Option ['d'] ["defs"] (ReqArg (\str opt -> opt {optDefFile = str}) "FILE")
+    "Use definitions in FILE."
+  , Option ['o'] ["output"] (ReqArg (\path opt -> opt {optOutput = writeFile path}) "FILE")
+    "Output to FILE."
   ]
+  where
+    writeFile path str = do
+      handle <- openFile path WriteMode
+      hPutStrLn handle str
+      hClose handle
 
 main :: IO ()
 main = do
@@ -37,7 +48,6 @@ main = do
 
   let opts = foldl ( . ) id actions
 
-  putStrLn $ usageInfo options
   return ()
   where
     header = "babel [options] <pattern>"
