@@ -43,6 +43,7 @@ generateDefMap contents =
 
 
 parseDef :: String -> (String, [String])
+-- ^Parse a definition from a string of the form "KEY = VALUE"
 parseDef line =
   let def = filter ( /= ' ') line
       (key, value) = break ( == '=') def
