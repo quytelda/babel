@@ -18,15 +18,35 @@
 -- along with babel.  If not, see <http://www.gnu.org/licenses/>.
 --
 
-module Sequence where
+module Sequence
+       ( parsePattern
+       , generateDefMap
+       , generateSequence
+       ) where
 
 
 import System.Random
-import Data.Map as Map
 
-parsePattern :: String -> Maybe [String]
+import Data.Text(pack, unpack, splitOn)
+import qualified Data.Map as Map
+
+parsePattern :: String -> [String]
 -- ^Attempt to parse a String into a list of pattern keys.
-parsePattern str = undefined
+parsePattern str = Prelude.map unpack (splitOn (pack ":") (pack str))
+
+
+generateDefMap :: [String] -> Map.Map String [String]
+-- ^Generate a map from a list of strings representing the pattern definitions.
+generateDefMap contents =
+  let definitions = map parseDef contents
+      in Map.fromList definitions
+
+
+parseDef :: String -> (String, [String])
+parseDef line =
+  let def = filter ( /= ' ') line
+      (key, value) = break ( == '=') def
+      in (key, subdivide $ tail value)
 
 
 generateSequence :: [String] -> Map.Map String [String] -> IO [String]
@@ -38,3 +58,8 @@ selectRandom :: [a] -> IO a
 -- ^Select a random item from a list
 selectRandom list = randomRIO (0, length list - 1) >>=
                     (\x -> return (list !! x))
+
+subdivide :: [a] -> [[a]]
+-- ^Subdivides a list into a list of lists for each element of the original.
+subdivide [] = []
+subdivide (x:xs) = [x] : subdivide xs

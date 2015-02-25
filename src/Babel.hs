@@ -77,13 +77,16 @@ main = do
       Options { optHelp = help
               , optOutput = output
               , optNumber = number
+              , optDefFile = defFile
               } = getOptions defaults
 
   when help $ do
     putStrLn $ usageInfo header options
     exitSuccess
 
-  -- TODO: load definitions map
+  -- load definitions map
+  contents <- openFile defFile ReadMode >>= hGetContents
+  let defs = generateDefMap (lines contents)
 
   -- generate sequences
   when (length params < 1) $ do
@@ -94,8 +97,6 @@ main = do
   let pattern = parsePattern (params !! 0)
 
   -- TODO: generate sequences
-
-  -- TODO: sequence output
 
   return ()
   where
