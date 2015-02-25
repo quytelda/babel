@@ -62,31 +62,6 @@ options =
   ]
 
 
-data Options = Options { optHelp :: Bool
-                       , optQuiet :: Bool
-                       , optNumber :: Int
-                       , optOutput :: (String -> IO ())
-                       , optConfig :: FilePath
-                       }
-
-defaults :: Options
-defaults = Options { optHelp = False
-                   , optQuiet = False
-                   , optNumber = 1
-                   , optOutput = putStrLn
-                   , optConfig = "./babel.defs"
-                   }
-
-options :: [OptDescr (Options -> Options)]
-options =
-  [ Option ['h'] ["help"] (NoArg (\opt -> opt {optHelp = True}))
-    "Display help message."
-  , Option ['q'] ["quit"] (NoArg (\opt -> opt {optQuiet = True}))
-    "Supress output."
-  , Option ['n'] [] (ReqArg (\str opt -> opt {optNumber = (read str :: Int)}) "N")
-    "Generate N sequences."
-  ]
-
 main :: IO ()
 main = do
   -- argument parsing
