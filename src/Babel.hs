@@ -25,7 +25,7 @@ import System.Environment
 import System.Exit
 import System.Console.GetOpt
 
-import Control.Monad(when)
+import Control.Monad(when, replicateM)
 
 import Sequence
 
@@ -96,8 +96,11 @@ main = do
 
   let pattern = parsePattern (params !! 0)
 
-  -- TODO: generate sequences
+  -- generate sequences
+  results <- replicateM number (generateSequence pattern defs)
+  let seqs = map concat results
 
-  return ()
+  output $ unlines seqs
+
   where
     header = "Usage: babel [OPTION...] PATTERN"

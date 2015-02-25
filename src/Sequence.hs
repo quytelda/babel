@@ -51,7 +51,12 @@ parseDef line =
 
 generateSequence :: [String] -> Map.Map String [String] -> IO [String]
 -- ^Generate a randomized sequence based on the provided pattern and pattern definition map.
-generateSequence pattern defMap = undefined
+generateSequence pattern defMap =
+  mapM (\key ->
+        case Map.lookup key defMap of
+        (Just values) -> selectRandom values
+        (Nothing) -> return ""
+      ) pattern
 
 
 selectRandom :: [a] -> IO a
