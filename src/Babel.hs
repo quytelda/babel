@@ -20,18 +20,47 @@
 
 module Main where
 
-import System.Environment
-import System.Console.GetOpt
-import System.Exit
 import System.IO
-import System.Random
-import System.Directory
+import System.Environment
+import System.Exit
+import System.Console.GetOpt
 
-import qualified Data.Map as Map
-import Data.Text(pack, unpack, strip)
-import Control.Monad(when, mapM, replicateM, filterM)
+import Control.Monad(when)
 
-default_defs = Map.fromList[("UC", ['A'..'Z']), ("LC", ['a'..'z']), ("D", ['0'..'9'])]
+import Sequence
+
+-- |The Options record holds a representation of the runtime configuration
+data Options = Options { optHelp :: Bool
+                       , optNumber :: Int
+                       , optOutput :: (String -> IO ())
+                       , optDefFile :: FilePath
+                       }
+
+defaults :: Options
+-- ^The default runtime configuration record
+defaults = Options { optHelp = False
+                   , optNumber = 1
+                   , optOutput = putStrLn
+                   , optDefFile = "./babel.defs"
+                   }
+
+options :: [OptDescr (Options -> Options)]
+-- ^options describes the supported command-line arguments
+options =
+  [ Option ['h'] ["help"]
+    (NoArg (\opt -> opt {optHelp = True}))
+    "Display help and usage information."
+  , Option ['n'] []
+    (ReqArg (\str opt -> opt {optNumber = (read str :: Int)}) "N")
+    "Generate N different sequences."
+  , Option ['d'] ["defs"]
+    (ReqArg (\str opt -> opt {optDefFile = str}) "FILE")
+    "Use the definitions provided in FILE."
+  , Option ['o'] ["output"]
+    (ReqArg (\path opt -> opt {optOutput = writeFile path}) "FILE")
+    "Redirect output to FILE."
+  ]
+
 
 data Options = Options { optHelp :: Bool
                        , optQuiet :: Bool
@@ -60,102 +89,40 @@ options =
 
 main :: IO ()
 main = do
-
-  -- argument handling
+  -- argument parsing
   args <- getArgs
-  when (length args < 1) $ do
-    hPutStrLn stderr "Not enough arguments."
-    usage
+  let (actions, params, errs) = getOpt RequireOrder options args
+
+  when (not $ null errs) $ do
+    _ <- mapM (hPutStrLn stderr) errs
+    putStrLn $ usageInfo header options
     exitFailure
 
-  let (actions, params, errs) = getOpt RequireOrder options args
-      opts = foldl ( . ) id actions
+  let getOptions = foldl ( . ) id actions
+      Options { optHelp = help
+              , optOutput = output
+              , optNumber = number
+              , optDefFile = defFile
+              } = getOptions defaults
 
-  -- parse pattern
-  let pattern = splitBy ':' (args !! 0)
-  m <- loadDefs "babel.conf"
+  when help $ do
+    putStrLn $ usageInfo header options
+    exitSuccess
 
-  results <- (replicateM 5 (generate pattern m))
-  mapM putStrLn (map concat results)
+  -- load definitions map
+  contents <- openFile defFile ReadMode >>= hGetContents
+  let defs = generateDefMap (lines contents)
+
+  -- generate sequences
+  when (length params < 1) $ do
+    hPutStrLn stderr "Missing pattern."
+    putStrLn $ usageInfo header options
+    exitFailure
+
+  let pattern = parsePattern (params !! 0)
+
+  -- TODO: generate sequences
 
   return ()
-
-
-usage :: IO ()
-usage = putStrLn "Usage: babel [options] <pattern>"
-
-
-loadDefs :: FilePath -> IO (Map.Map String String)
--- ^Load custom sequence pattern definitions from a file.
-loadDefs path = do
-  fileExists <- doesFileExist path
-
-  if fileExists then do
-    contents <- openFile path ReadMode >>= hGetContents
-
-    pairs <- mapM (\line -> case parse line of
-                 (Just p) -> return p
-                 (Nothing) ->
-                   hPutStrLn stderr
-                   ("** warning (" ++ path ++ "): Invalid assignment (\"" ++ line ++ "\")") >>
-                   return ("", "")
-         )
-      (lines contents)
-
-    return (Map.fromList pairs)
-    else
-    return default_defs
-
-parse :: String -> Maybe (String, String)
-parse line =
-  case (break ( == '=') line) of
-   ("", _) -> Nothing
-   (_, "") -> Nothing
-   (s, t) -> Just (trim s, tail $ trim t)
   where
-    trim = unpack . strip . pack
-
-splitBy :: Char -> String -> [String]
--- ^Use a character delimiter to split a String into smaller components
-splitBy _ [] = []
-splitBy del xs = front : splitBy del (tail' back)
-  where
-    (front, back) = break ( == del) xs
-    tail' [] = []
-    tail' x = tail x
-
-
-generate :: [String] -> Map.Map String String -> IO [String]
--- ^use the provided pattern to randomly generate a matching sequence.
-generate pattern m = mapM (\k -> substitute k m) pattern
-
-
-substitute :: String -> Map.Map String String -> IO String
--- ^Look up a random substitute for the provided key in the key/value map.
-substitute k m
-  | null k = return ""
-  | (head k == '(' && last k == ')') = do
-      include <- chance
-
-      if include then
-        substitute (tail (init k)) m
-        else
-        return ""
-  | otherwise =
-      case (Map.lookup k m) of
-       (Just value) -> do
-         elem <- selectRandom value
-         return [elem]
-       (Nothing) -> do
-         hPutStrLn stderr $ "Invalid key: " ++ k
-         exitFailure
-  where
-    chance = randomIO :: IO Bool
-
-
-selectRandom :: [a] -> IO a
--- ^Pick a random item from a list
-selectRandom list = do
-  i <- randomRIO (0, max)
-  return (list !! i)
-  where max = (length list) - 1
+    header = "Usage: babel [OPTION...] PATTERN"
