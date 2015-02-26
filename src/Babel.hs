@@ -97,7 +97,6 @@ main = do
 
   let pattern = parsePattern (params !! 0)
 
-  -- generate sequences
   results <- replicateM number (generateSequence pattern defs)
   let seqs = map concat results
 

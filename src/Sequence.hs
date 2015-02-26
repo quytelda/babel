@@ -27,7 +27,7 @@ module Sequence
 
 import System.Random
 
-import Data.Text(pack, unpack, splitOn)
+import Data.Text(pack, unpack, splitOn, strip)
 import qualified Data.Map as Map
 
 parsePattern :: String -> [String]
@@ -53,11 +53,7 @@ parseDef line =
 generateSequence :: [String] -> Map.Map String [String] -> IO [String]
 -- ^Generate a randomized sequence based on the provided pattern and pattern definition map.
 generateSequence pattern defMap =
-  mapM (\key ->
-        case Map.lookup key defMap of
-        (Just values) -> selectRandom values
-        (Nothing) -> return ""
-      ) pattern
+  mapM (\key -> replace key defMap) pattern
 
 
 selectRandom :: [a] -> IO a
@@ -69,3 +65,18 @@ subdivide :: [a] -> [[a]]
 -- ^Subdivides a list into a list of lists for each element of the original.
 subdivide [] = []
 subdivide (x:xs) = [x] : subdivide xs
+
+replace :: String -> Map.Map String [String] -> IO String
+replace [] _ = return ""
+replace key defMap = if (head k == '(') && (last k == ')') then do
+                       chance <- (randomIO :: IO Bool)
+
+                       if chance then replace ((tail . init) k) defMap
+                                      else return ""
+                     else
+                       case Map.lookup key defMap of
+                         (Just values) -> selectRandom values
+                         (Nothing) -> return ""
+  where
+    trim = unpack . strip . pack
+    k = trim key
