@@ -69,7 +69,7 @@ main = do
   let (actions, params, errs) = getOpt RequireOrder options args
 
   when (not $ null errs) $ do
-    _ <- mapM (hPutStrLn stderr) errs
+    hPutStrLn stderr (unlines errs)
     putStrLn $ usageInfo header options
     exitFailure
 
@@ -86,11 +86,12 @@ main = do
 
   -- load definitions map
   contents <- openFile defFile ReadMode >>= hGetContents
-  let defs = generateDefMap (lines contents)
+  let defs = generateDefMap $
+             filter (\l -> not (null l) && head l /= '#') (lines contents)
 
   -- generate sequences
   when (length params < 1) $ do
-    hPutStrLn stderr "Missing pattern."
+    hPutStrLn stderr "Missing pattern parameter."
     putStrLn $ usageInfo header options
     exitFailure
 
