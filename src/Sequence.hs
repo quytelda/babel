@@ -25,9 +25,11 @@ module Sequence
        ) where
 
 
-import System.Random
+import System.IO
+import System.Exit
+import System.Random(randomIO, randomRIO)
 
-import Data.Text(pack, unpack, splitOn, strip)
+import Data.Text(pack, unpack, splitOn)
 import qualified Data.Map as Map
 
 parsePattern :: String -> [String]
@@ -50,10 +52,10 @@ parseDef line =
       in (key, subdivide $ tail value)
 
 
-generateSequence :: [String] -> Map.Map String [String] -> IO [String]
+generateSequence :: [String] -> Map.Map String [String] -> Bool -> IO [String]
 -- ^Generate a randomized sequence based on the provided pattern and pattern definition map.
-generateSequence pattern defMap =
-  mapM (\key -> replace key defMap) pattern
+generateSequence pattern defMap strict =
+  mapM (\key -> replace key defMap strict) pattern
 
 
 selectRandom :: [a] -> IO a
@@ -66,17 +68,28 @@ subdivide :: [a] -> [[a]]
 subdivide [] = []
 subdivide (x:xs) = [x] : subdivide xs
 
-replace :: String -> Map.Map String [String] -> IO String
-replace [] _ = return ""
-replace key defMap = if (head k == '(') && (last k == ')') then do
-                       chance <- (randomIO :: IO Bool)
+replace :: String -> Map.Map String [String] -> Bool -> IO String
+-- ^Generate a random substitute value for a key from the definition map.
+-- ^Enable strict to fail and exit when an invalid key is used.
+replace [] _ _ = return ""
+replace key defMap strict =
+  if (head key == '(') && (last key == ')') then do
+    chance <- (randomIO :: IO Bool)
 
-                       if chance then replace ((tail . init) k) defMap
-                                      else return ""
-                     else
-                       case Map.lookup key defMap of
-                         (Just values) -> selectRandom values
-                         (Nothing) -> return ""
+    if chance then
+      let k = (init . tail) key
+      in replace k defMap strict
+      else return ""
+
+  else
+    case Map.lookup key defMap of
+     (Just values) -> selectRandom values
+     (Nothing) -> if strict then
+                    failKey key >> return "" -- to make GHC happy
+                  else
+                    return ""
   where
-    trim = unpack . strip . pack
-    k = trim key
+    failKey :: String -> IO ()
+    failKey k = do
+      hPutStrLn stderr ("Invalid Key: " ++ k)
+      exitFailure

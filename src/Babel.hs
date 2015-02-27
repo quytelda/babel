@@ -32,6 +32,7 @@ import Sequence
 -- |The Options record holds a representation of the runtime configuration
 data Options = Options { optHelp :: Bool
                        , optNumber :: Int
+                       , optStrict :: Bool
                        , optOutput :: (String -> IO ())
                        , optDefFile :: FilePath
                        }
@@ -40,6 +41,7 @@ defaults :: Options
 -- ^The default runtime configuration record
 defaults = Options { optHelp = False
                    , optNumber = 1
+                   , optStrict = False
                    , optOutput = putStrLn
                    , optDefFile = "./babel.defs"
                    }
@@ -53,6 +55,9 @@ options =
   , Option ['n'] []
     (ReqArg (\str opt -> opt {optNumber = (read str :: Int)}) "N")
     "Generate N different sequences."
+  , Option ['s'] ["strict"]
+    (NoArg (\opt -> opt {optStrict = True}))
+    "Apply strict pattern checking."
   , Option ['d'] ["defs"]
     (ReqArg (\str opt -> opt {optDefFile = str}) "FILE")
     "Use the definitions provided in FILE."
@@ -77,6 +82,7 @@ main = do
       Options { optHelp = help
               , optOutput = output
               , optNumber = number
+              , optStrict = strict
               , optDefFile = defFile
               } = getOptions defaults
 
@@ -97,7 +103,7 @@ main = do
 
   let pattern = parsePattern (params !! 0)
 
-  results <- replicateM number (generateSequence pattern defs)
+  results <- replicateM number (generateSequence pattern defs strict)
   let seqs = map concat results
 
   output $ unlines seqs
