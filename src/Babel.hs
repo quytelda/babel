@@ -1,6 +1,6 @@
 --
 -- Babel.hs -- configurable sequence generator
--- Copyright (C) 2015 Quytelda <quytelda@tamalin.org>
+-- Copyright (C) 2015 Quytelda Kahja <quytelda@tamalin.org>
 --
 -- This file is part of babel.
 
