@@ -96,7 +96,7 @@ main = do
              filter (\l -> not (null l) && head l /= '#') (lines contents)
 
   -- generate sequences
-  when (length params < 1) $ do
+  when (null params) $ do
     hPutStrLn stderr "Missing pattern parameter."
     putStrLn $ usageInfo header options
     exitFailure
