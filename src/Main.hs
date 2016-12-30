@@ -1,6 +1,5 @@
---
--- Babel.hs -- configurable sequence generator
--- Copyright (C) 2015 Quytelda Kahja <quytelda@tamalin.org>
+-- Main.hs -- The entry point for the babel sequence generator
+-- Copyright (C) 2016 Quytelda Kahja <quytelda@tamalin.org>
 --
 -- This file is part of babel.
 
@@ -27,27 +26,22 @@ import System.Console.GetOpt
 
 import Control.Monad(when, replicateM)
 
-import Sequence
-
--- |The Options record holds a representation of the runtime configuration
-data Options = Options { optHelp :: Bool
-                       , optNumber :: Int
-                       , optStrict :: Bool
-                       , optOutput :: (String -> IO ())
+-- | The Options record holds a representation of the runtime configuration.
+data Options = Options { optHelp    :: Bool
+                       , optNumber  :: Int
+                       , optOutput  :: (String -> IO ())
                        , optDefFile :: FilePath
                        }
 
-defaults :: Options
--- ^The default runtime configuration record
-defaults = Options { optHelp = False
-                   , optNumber = 1
-                   , optStrict = False
-                   , optOutput = putStrLn
-                   , optDefFile = "./babel.defs"
+-- | @defaults@ is the default runtime configuration record.
+defaults = Options { optHelp    = False
+                   , optNumber  = 1
+                   , optOutput  = putStrLn
+                   , optDefFile = "./babel.def"
                    }
 
+-- | @options@ describes the supported command-line arguments
 options :: [OptDescr (Options -> Options)]
--- ^options describes the supported command-line arguments
 options =
   [ Option ['h'] ["help"]
     (NoArg (\opt -> opt {optHelp = True}))
@@ -55,17 +49,13 @@ options =
   , Option ['n'] []
     (ReqArg (\str opt -> opt {optNumber = (read str :: Int)}) "N")
     "Generate N different sequences."
-  , Option ['s'] ["strict"]
-    (NoArg (\opt -> opt {optStrict = True}))
-    "Apply strict pattern checking."
-  , Option ['d'] ["defs"]
+  , Option ['d'] ["def"]
     (ReqArg (\str opt -> opt {optDefFile = str}) "FILE")
-    "Use the definitions provided in FILE."
+    "Use the definition provided in FILE."
   , Option ['o'] ["output"]
     (ReqArg (\path opt -> opt {optOutput = writeFile path}) "FILE")
     "Redirect output to FILE."
   ]
-
 
 main :: IO ()
 main = do
@@ -75,38 +65,19 @@ main = do
 
   when (not $ null errs) $ do
     hPutStrLn stderr (unlines errs)
-    putStrLn $ usageInfo header options
+    putStrLn (usageInfo header options)
     exitFailure
 
   let getOptions = foldl ( . ) id actions
       Options { optHelp = help
               , optOutput = output
               , optNumber = number
-              , optStrict = strict
               , optDefFile = defFile
               } = getOptions defaults
 
   when help $ do
-    putStrLn $ usageInfo header options
+    putStrLn (usageInfo header options)
     exitSuccess
-
-  -- load definitions map
-  contents <- openFile defFile ReadMode >>= hGetContents
-  let defs = generateDefMap $
-             filter (\l -> not (null l) && head l /= '#') (lines contents)
-
-  -- generate sequences
-  when (null params) $ do
-    hPutStrLn stderr "Missing pattern parameter."
-    putStrLn $ usageInfo header options
-    exitFailure
-
-  let pattern = parsePattern (params !! 0)
-
-  results <- replicateM number (generateSequence pattern defs strict)
-  let seqs = map concat results
-
-  output $ unlines seqs
 
   where
     header = "Usage: babel [OPTION...] PATTERN"
