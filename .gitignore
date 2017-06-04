@@ -1,4 +1,27 @@
-*.hi
-*.o
-*~
+# Normal rules
 babel
+.*
+*.o
+*.hi
+*.a
+*.s
+*.so
+*.so.dbg
+*.i
+*.lst
+*.bin
+*.tar
+*.gz
+*.bz2
+*.lzma
+*.xz
+*.lz4
+*.lzo
+*.patch
+
+!.gitignore
+
+# temporary files
+*.old
+*~
+\#*#
