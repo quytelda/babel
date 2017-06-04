@@ -29,14 +29,12 @@ import Control.Monad(when, replicateM)
 data Options = Options { optHelp    :: Bool
                        , optNumber  :: Int
                        , optOutput  :: (String -> IO ())
-                       , optDefFile :: FilePath
                        }
 
 -- | @defaults@ is the default runtime configuration record.
 defaults = Options { optHelp    = False
                    , optNumber  = 1
                    , optOutput  = putStrLn
-                   , optDefFile = "./babel.def"
                    }
 
 -- | @options@ describes the supported command-line arguments
@@ -48,9 +46,6 @@ options =
   , Option ['n'] []
     (ReqArg (\str opt -> opt {optNumber = (read str :: Int)}) "N")
     "Generate N different sequences."
-  , Option ['d'] ["def"]
-    (ReqArg (\str opt -> opt {optDefFile = str}) "FILE")
-    "Use the definition provided in FILE."
   , Option ['o'] ["output"]
     (ReqArg (\path opt -> opt {optOutput = writeFile path}) "FILE")
     "Redirect output to FILE."
@@ -64,14 +59,16 @@ main = do
 
   when (not $ null errs) $ do
     hPutStrLn stderr (unlines errs)
-    putStrLn (usageInfo header options)
-    exitFailure
+    failUsageInfo
+
+  when (null params) $ do
+    hPutStrLn stderr "You must provide a grammar file."
+    failUsageInfo
 
   let getOptions = foldl ( . ) id actions
-      Options { optHelp = help
+      Options { optHelp   = help
               , optOutput = output
               , optNumber = number
-              , optDefFile = defFile
               } = getOptions defaults
 
   when help $ do
@@ -79,4 +76,5 @@ main = do
     exitSuccess
 
   where
-    header = "Usage: babel [OPTION...] PATTERN"
+    header = "Usage: babel [OPTION...] GRAMMAR_FILE"
+    failUsageInfo = putStrLn (usageInfo header options) >> exitFailure
