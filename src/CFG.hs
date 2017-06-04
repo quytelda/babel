@@ -19,9 +19,9 @@
 module CFG where
 
 import Prelude hiding (lookup)
-import System.Random
 import Data.Maybe
 import Data.Map
+import System.Random
 
 data Symbol = Node String
             | Terminal String
@@ -36,6 +36,14 @@ produce cfg sym =
     Just [] -> return []
     Just ss -> fromJust <$> (pickRIO ss) >>= return
     _       -> return []
+
+{-| Use a series of random productions to expand a CFG grammer into a set of
+terminal symbols -}
+expand :: CFG -> Symbol -> IO String
+expand cfg sym@(Node nt) = do
+  symbols <- produce cfg sym
+  concat <$> mapM (expand cfg) symbols
+expand cfg sym@(Terminal t) = return t
 
 {-| Randomly select an element from a list. -}
 pickRIO :: [a] -> IO (Maybe a)

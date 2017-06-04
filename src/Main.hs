@@ -25,6 +25,8 @@ import System.Console.GetOpt
 
 import Control.Monad(when, replicateM)
 
+import CFG
+
 -- | The Options record holds a representation of the runtime configuration.
 data Options = Options { optHelp    :: Bool
                        , optNumber  :: Int
