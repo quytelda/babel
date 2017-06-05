@@ -31,12 +31,14 @@ import CFG
 data Options = Options { optHelp    :: Bool
                        , optNumber  :: Int
                        , optOutput  :: (String -> IO ())
+                       , optStart   :: Symbol
                        }
 
 -- | @defaults@ is the default runtime configuration record.
 defaults = Options { optHelp    = False
                    , optNumber  = 1
                    , optOutput  = putStrLn
+                   , optStart   = "S"
                    }
 
 -- | @options@ describes the supported command-line arguments
@@ -51,6 +53,9 @@ options =
   , Option ['o'] ["output"]
     (ReqArg (\path opt -> opt {optOutput = writeFile path}) "FILE")
     "Redirect output to FILE."
+  , Option ['s'] ["start"]
+    (ReqArg (\sym opt -> opt {optStart = sym}) "SYMBOL")
+    "Use SYMBOL as the starting symbol."
   ]
 
 main :: IO ()
@@ -71,6 +76,7 @@ main = do
       Options { optHelp   = help
               , optOutput = output
               , optNumber = number
+              , optStart  = start
               } = getOptions defaults
 
   when help $ do
@@ -79,6 +85,11 @@ main = do
 
   -- Load the grammar file
   description <- readFile (head params)
+  case parseCFG description of
+    Left  err -> hPutStrLn stderr (show err)
+    Right cfg -> do
+      results <- replicateM number (expand cfg start)
+      output (unlines results)
 
   where
     header = "Usage: babel [OPTION...] GRAMMAR_FILE"

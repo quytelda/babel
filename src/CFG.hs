@@ -16,7 +16,7 @@
 -- You should have received a copy of the GNU General Public License
 -- along with babel.  If not, see <http://www.gnu.org/licenses/>.
 
-module CFG (produce, expand, parseCFG) where
+module CFG (produce, expand, parseCFG, Symbol) where
 
 import Prelude hiding (lookup)
 import Data.Maybe
