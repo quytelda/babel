@@ -24,10 +24,7 @@ import Data.Map
 import System.Random
 import Text.ParserCombinators.Parsec
 
-data Symbol = Node String
-            | Terminal String
-            deriving (Eq, Show, Ord)
-
+type Symbol = String
 type CFG = (Map Symbol [[Symbol]])
 
 {-| Follow a single production, randomly selecting between alternative rules. -}
@@ -41,43 +38,15 @@ produce cfg sym =
 {-| Use a series of random productions to expand a CFG grammer into a set of
 terminal symbols -}
 expand :: CFG -> Symbol -> IO String
-expand cfg sym@(Node nt) = do
-  symbols <- produce cfg sym
-  concat <$> mapM (expand cfg) symbols
-expand cfg sym@(Terminal t) = return t
+expand cfg sym =
+  case lookup sym cfg of
+    Just nt -> do
+      symbols <- produce cfg sym
+      concat <$> mapM (expand cfg) symbols
+    Nothing -> return sym
 
--- Parsec parser for CFGs
-
-whitespace = many (oneOf " \t")
-
-cfg = endBy rules (char '\n')
-
-rules = do
-  _ <- whitespace
-  var <- variable
-  _ <- whitespace
-  opt <- options
-  return (var, opt)
-
-variable = do
-  _ <- whitespace
-  result <- symbol
-  _ <- whitespace
-  string "->"
-  _ <- whitespace
-  return result
-
-options = do
-  _ <- whitespace
-  sepBy symbol (char '|')
-symbol = do
-  _ <- whitespace
-  result <- many (noneOf "|->\n ")
-  _ <- whitespace
-  return result
-
-parseCFG :: String -> FilePath -> Either ParseError [(String, [String])]
-parseCFG input fp = parse cfg fp input
+parseCFG :: String -> Either ParseError CFG
+parseCFG input = undefined
 
 {-| Randomly select an element from a list. -}
 pickRIO :: [a] -> IO (Maybe a)

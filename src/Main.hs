@@ -77,6 +77,9 @@ main = do
     putStrLn (usageInfo header options)
     exitSuccess
 
+  -- Load the grammar file
+  description <- readFile (head params)
+
   where
     header = "Usage: babel [OPTION...] GRAMMAR_FILE"
     failUsageInfo = putStrLn (usageInfo header options) >> exitFailure
