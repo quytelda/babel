@@ -23,6 +23,8 @@ import Data.Maybe
 import Data.Map
 import System.Random
 import Text.ParserCombinators.Parsec
+import Text.Parsec.Char
+import Text.Parsec.Prim
 
 type Symbol = String
 type CFG = (Map Symbol [[Symbol]])
@@ -45,11 +47,29 @@ expand cfg sym =
       concat <$> mapM (expand cfg) symbols
     Nothing -> return sym
 
-parseCFG :: String -> Either ParseError CFG
-parseCFG input = undefined
-
 {-| Randomly select an element from a list. -}
 pickRIO :: [a] -> IO (Maybe a)
 pickRIO [] = return Nothing
 pickRIO xs = randomRIO (0, length xs - 1)
              >>= return . Just . (xs !!)
+
+{-| Parse a string description of a context free grammer into a CFG type. -}
+parseCFG :: String -> Either ParseError CFG
+parseCFG input = parse cfg "" input
+
+symbol     = many1 alphaNum
+group      = do
+  spaces
+  g <- sepEndBy1 symbol space
+  spaces
+  return g
+alternates = sepBy1 group (char '|')
+rules = do
+  spaces
+  var <- symbol
+  spaces
+  string "->"
+  spaces
+  alt <- alternates
+  return (var, alt)
+cfg = fromList <$> endBy rules (char ';')
