@@ -57,8 +57,8 @@ pickRIO xs = randomRIO (0, length xs - 1)
 parseCFG :: String -> Either ParseError CFG
 parseCFG input = parse cfg "" input
 
-symbol     = many1 alphaNum
-group      = do
+symbol = many1 (noneOf ";|-> ")
+group  = do
   spaces
   g <- sepEndBy1 symbol space
   spaces
@@ -67,9 +67,7 @@ alternates = sepBy1 group (char '|')
 rules = do
   spaces
   var <- symbol
-  spaces
-  string "->"
-  spaces
+  spaces >> (string "->") >> spaces
   alt <- alternates
   return (var, alt)
 cfg = fromList <$> endBy rules (char ';')
