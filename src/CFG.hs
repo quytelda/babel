@@ -1,5 +1,5 @@
--- Main.hs -- The entry point for the babel sequence generator
--- Copyright (C) 2016 Quytelda Kahja <quytelda@tamalin.org>
+-- CFG.hs -- Context Free Grammar representation, parsing, and application.
+-- Copyright (C) 2017 Quytelda Kahja <quytelda@tamalin.org>
 --
 -- This file is part of babel.
 
@@ -19,12 +19,12 @@
 module CFG (produce, expand, parseCFG, Symbol) where
 
 import Prelude hiding (lookup)
-import Data.Maybe
+import Data.Maybe (fromJust)
 import Data.Map
 import System.Random
-import Text.ParserCombinators.Parsec
 import Text.Parsec.Char
 import Text.Parsec.Prim
+import Text.ParserCombinators.Parsec
 
 type Symbol = String
 type CFG = (Map Symbol [[Symbol]])

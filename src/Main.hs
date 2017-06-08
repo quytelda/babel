@@ -1,5 +1,5 @@
 -- Main.hs -- The entry point for the babel sequence generator
--- Copyright (C) 2016 Quytelda Kahja <quytelda@tamalin.org>
+-- Copyright (C) 2017 Quytelda Kahja <quytelda@tamalin.org>
 --
 -- This file is part of babel.
 
@@ -18,12 +18,11 @@
 
 module Main where
 
-import System.IO
-import System.Environment
-import System.Exit
-import System.Console.GetOpt
-
 import Control.Monad(when, replicateM)
+import System.Console.GetOpt
+import System.Environment
+import System.Exit (exitSuccess, exitFailure)
+import System.IO
 
 import CFG
 
@@ -55,7 +54,7 @@ options =
     "Redirect output to FILE."
   , Option ['s'] ["start"]
     (ReqArg (\sym opt -> opt {optStart = sym}) "SYMBOL")
-    "Use SYMBOL as the starting symbol."
+    "Use SYMBOL as the starting symbol (\"S\" is the default.)."
   ]
 
 main :: IO ()
