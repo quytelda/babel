@@ -27,7 +27,7 @@ import System.IO
 import CFG
 import Version
 
-releaseVersion = Development
+releaseVersion = Unstable (Version 2 0)
 
 -- | The Options record holds a representation of the runtime configuration.
 data Options = Options { optHelp    :: Bool
