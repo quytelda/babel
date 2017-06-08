@@ -8,7 +8,7 @@ abcab
 cba
 bcabcba
 ```
-If grammar.cfg contains the following:
+In this example, grammar.cfg contains the following:
 ```
 S -> A | B | C;
 A -> a B | a C | a;
@@ -16,9 +16,11 @@ B -> b A | b C | b;
 C -> c A | c B | c;
 ```
 # What's Needed
-To compile babel, you should have the Glasgow Haskell Compiler (GHC) and the Haskell random libraries (provides System.Random).
+In order to build babel, you must at least have the haskell compiler GHC.  If you have Cabal installed, just run `cabal build` from the top level directory (where babel.cabal is located).  Otherwise, you can compile an executable by running `ghc -o babel --make -isrc src/Main.hs`.
 
-To compile, run `make` from the top level directory (containing `makefile`) or alternatively:
-```
-$ ghc -o babel --make -isrc src/Main.hs
-```
+Babel depends on the following haskell packages:
+- containers (>=0.5 && <0.6)
+- random (>=1.1 && <1.2)
+- parsec (>=3.1 && <3.2)
+
+All these packages are available in the repositories for most Linux distributions.
