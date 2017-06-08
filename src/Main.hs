@@ -67,10 +67,6 @@ main = do
     hPutStrLn stderr (unlines errs)
     failUsageInfo
 
-  when (null params) $ do
-    hPutStrLn stderr "You must provide a grammar file."
-    failUsageInfo
-
   let getOptions = foldl ( . ) id actions
       Options { optHelp   = help
               , optOutput = output
@@ -81,6 +77,10 @@ main = do
   when help $ do
     putStrLn (usageInfo header options)
     exitSuccess
+
+  when (null params) $ do
+    hPutStrLn stderr "You must provide a grammar file."
+    failUsageInfo
 
   -- Load the grammar file
   description <- readFile (head params)
