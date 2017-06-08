@@ -25,12 +25,16 @@ import System.Exit (exitSuccess, exitFailure)
 import System.IO
 
 import CFG
+import Version
+
+releaseVersion = Development
 
 -- | The Options record holds a representation of the runtime configuration.
 data Options = Options { optHelp    :: Bool
                        , optNumber  :: Int
                        , optOutput  :: (String -> IO ())
                        , optStart   :: Symbol
+                       , optVersion :: Bool
                        }
 
 -- | @defaults@ is the default runtime configuration record.
@@ -38,6 +42,7 @@ defaults = Options { optHelp    = False
                    , optNumber  = 1
                    , optOutput  = putStrLn
                    , optStart   = "S"
+                   , optVersion = False
                    }
 
 -- | @options@ describes the supported command-line arguments
@@ -55,6 +60,9 @@ options =
   , Option ['s'] ["start"]
     (ReqArg (\sym opt -> opt {optStart = sym}) "SYMBOL")
     "Use SYMBOL as the starting symbol (\"S\" is the default.)."
+  , Option ['v'] ["version"]
+    (NoArg (\opt -> opt {optVersion = True}))
+    "Display version information."
   ]
 
 main :: IO ()
@@ -68,11 +76,16 @@ main = do
     failUsageInfo
 
   let getOptions = foldl ( . ) id actions
-      Options { optHelp   = help
-              , optOutput = output
-              , optNumber = number
-              , optStart  = start
+      Options { optHelp    = help
+              , optOutput  = output
+              , optNumber  = number
+              , optStart   = start
+              , optVersion = version
               } = getOptions defaults
+
+  when version $ do
+    putStrLn (show releaseVersion)
+    exitSuccess
 
   when help $ do
     putStrLn (usageInfo header options)
