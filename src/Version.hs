@@ -15,3 +15,6 @@ instance Show Release where
   show (Stable ver)   = show ver ++ "-stable"
   show (Unstable ver) = show ver ++ "-unstable"
   show Development    = "development"
+
+releaseInfo :: String -> Release -> String
+releaseInfo pgm ver = pgm ++ " " ++ show ver

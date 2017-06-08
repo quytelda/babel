@@ -84,7 +84,7 @@ main = do
               } = getOptions defaults
 
   when version $ do
-    putStrLn (show releaseVersion)
+    putStrLn (releaseInfo "babel" releaseVersion)
     exitSuccess
 
   when help $ do
