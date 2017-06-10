@@ -10,10 +10,10 @@ bcabcba
 ```
 In this example, grammar.cfg contains the following:
 ```
-S -> A | B | C;
-A -> a B | a C | a;
-B -> b A | b C | b;
-C -> c A | c B | c;
+S -> A | B | C
+A -> a B | a C | a
+B -> b A | b C | b
+C -> c A | c B | c
 ```
 # What's Needed
 In order to build babel, you must at least have the haskell compiler GHC.  If you have Cabal installed, just run `cabal build` from the top level directory (where babel.cabal is located).  Otherwise, you can compile an executable by running `ghc -o babel --make -isrc src/Main.hs`.
