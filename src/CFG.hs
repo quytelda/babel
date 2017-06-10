@@ -73,12 +73,12 @@ symbol = many1 (noneOf ";|-> \n")
 
 {-| groups parses a series of whitespace seperated symbols. -}
 groups :: Parser [Symbol]
-groups = lexeme $ sepEndBy1 symbol space
+groups = lexeme $ sepEndBy1 symbol (char ' ')
 
 {-| alternates parses a list of alternative productions for a non-terminal in
 the CFG grammar. -}
 alternates :: Parser [[Symbol]]
-alternates = lexeme $ sepBy1 groups (char '|')
+alternates = sepBy1 groups (char '|')
 
 {-| rule parses a single CFG rule, which maps a variable to it possible
 derivations when it is produced. -}
