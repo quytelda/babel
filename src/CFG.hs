@@ -57,17 +57,40 @@ pickRIO xs = randomRIO (0, length xs - 1)
 parseCFG :: String -> Either ParseError CFG
 parseCFG input = parse cfg "" input
 
-symbol = many1 (noneOf ";|-> ")
-group  = do
-  spaces
-  g <- sepEndBy1 symbol space
-  spaces
-  return g
-alternates = sepBy1 group (char '|')
-rules = do
-  spaces
+{-| lexeme parses something with the parser p, ignoring leading and trailing
+whitespace. -}
+lexeme :: Parser a -> Parser a
+lexeme p = do
+  _ <- skipMany (oneOf " \t")
+  result <- p
+  _ <- skipMany (oneOf " \t")
+  return result
+
+{-| symbol parses a string of characters until it reaches whitespace or a
+special control character. -}
+symbol :: Parser Symbol
+symbol = many1 (noneOf ";|-> \n")
+
+{-| groups parses a series of whitespace seperated symbols. -}
+groups :: Parser [Symbol]
+groups = lexeme $ sepEndBy1 symbol space
+
+{-| alternates parses a list of alternative productions for a non-terminal in
+the CFG grammar. -}
+alternates :: Parser [[Symbol]]
+alternates = lexeme $ sepBy1 groups (char '|')
+
+{-| rule parses a single CFG rule, which maps a variable to it possible
+derivations when it is produced. -}
+rule :: Parser (Symbol, [[Symbol]])
+rule = do
   var <- symbol
-  spaces >> (string "->") >> spaces
+  _ <- lexeme $ string "->"
   alt <- alternates
   return (var, alt)
-cfg = fromList <$> endBy rules (char ';')
+
+{-| cfg parses a string representing a context free grammar in the format of
+line by line rules mapping variables to productions. It returns a dictionary of
+these mappings. -}
+cfg :: Parser CFG
+cfg = fromList <$> sepEndBy (lexeme rule) endOfLine
