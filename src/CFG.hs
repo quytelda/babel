@@ -19,6 +19,7 @@
 module CFG (produce, expand, parseCFG, Symbol) where
 
 import Prelude hiding (lookup)
+import Data.Functor
 import Data.Maybe (fromJust)
 import Data.Map
 import System.Random
