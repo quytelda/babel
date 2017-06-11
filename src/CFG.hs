@@ -99,7 +99,10 @@ cfg = do
   where compress [] a = a
         compress (r@(var, ss) : rs) a =
           case lookup var a of
-            (Just ts) -> compress rs $ (var, ss ++ ts) : filter (\r' -> fst r' /= var) a
+            (Just ts) ->
+              let r' = (var, ss ++ ts)
+                  a' = filter (\x -> var /= fst x) a
+              in compress rs (r' : a')
             _         -> compress rs (r : a)
 
 
