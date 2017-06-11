@@ -1,4 +1,4 @@
-# Babel
+# Babel [![Build Status](https://travis-ci.org/quytelda/babel.svg?branch=master)](https://travis-ci.org/quytelda/babel)
 Babel is a small utility written in Haskell that generates random sequences based on a context free grammar (CFG).  It can be used as a word generator or password generator.
 
 For example:
