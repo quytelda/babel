@@ -70,7 +70,7 @@ lexeme p = do
 {-| symbol parses a string of characters until it reaches whitespace or a
 special control character. -}
 symbol :: Parser Symbol
-symbol = many1 (noneOf ";|-> \n")
+symbol = many1 (noneOf "|-> \n")
 
 {-| groups parses a series of whitespace seperated symbols. -}
 groups :: Parser [Symbol]
