@@ -18,22 +18,21 @@
 
 module CFG (produce, expand, parseCFG, Symbol) where
 
-import Prelude hiding (lookup)
 import Data.Functor
 import Data.Maybe (fromJust)
-import Data.Map
+import qualified Data.Map as Map
 import System.Random
 import Text.Parsec.Char
 import Text.Parsec.Prim
 import Text.ParserCombinators.Parsec
 
 type Symbol = String
-type CFG = (Map Symbol [[Symbol]])
+type CFG = (Map.Map Symbol [[Symbol]])
 
 {-| Follow a single production, randomly selecting between alternative rules. -}
 produce :: CFG -> Symbol -> IO [Symbol]
 produce cfg sym =
-  case lookup sym cfg of
+  case Map.lookup sym cfg of
     Just [] -> return []
     Just ss -> fromJust <$> (pickRIO ss) >>= return
     _       -> return []
@@ -42,7 +41,7 @@ produce cfg sym =
 terminal symbols -}
 expand :: CFG -> Symbol -> IO String
 expand cfg sym =
-  case lookup sym cfg of
+  case Map.lookup sym cfg of
     Just nt -> do
       symbols <- produce cfg sym
       concat <$> mapM (expand cfg) symbols
@@ -94,4 +93,13 @@ rule = do
 line by line rules mapping variables to productions. It returns a dictionary of
 these mappings. -}
 cfg :: Parser CFG
-cfg = fromList <$> sepEndBy (lexeme rule) endOfLine
+cfg = do
+  rules <- sepEndBy (lexeme rule) endOfLine
+  return $ Map.fromList (compress rules [])
+  where compress [] a = a
+        compress (r@(var, ss) : rs) a =
+          case lookup var a of
+            (Just ts) -> compress rs $ (var, ss ++ ts) : filter (\r' -> fst r' /= var) a
+            _         -> compress rs (r : a)
+
+
