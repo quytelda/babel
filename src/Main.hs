@@ -19,6 +19,7 @@
 module Main where
 
 import Control.Monad(when, replicateM)
+import Data.List.Split
 import System.Console.GetOpt
 import System.Environment
 import System.Exit (exitSuccess, exitFailure)
@@ -30,19 +31,19 @@ import Version
 releaseVersion = Development
 
 -- | The Options record holds a representation of the runtime configuration.
-data Options = Options { optHelp    :: Bool
-                       , optNumber  :: Int
-                       , optOutput  :: (String -> IO ())
-                       , optStart   :: Symbol
-                       , optVersion :: Bool
+data Options = Options { optHelp     :: Bool
+                       , optNumber   :: Int
+                       , optOutput   :: (String -> IO ())
+                       , optTemplate :: [Symbol]
+                       , optVersion  :: Bool
                        }
 
 -- | @defaults@ is the default runtime configuration record.
-defaults = Options { optHelp    = False
-                   , optNumber  = 1
-                   , optOutput  = putStrLn
-                   , optStart   = "S"
-                   , optVersion = False
+defaults = Options { optHelp     = False
+                   , optNumber   = 1
+                   , optOutput   = putStrLn
+                   , optTemplate = ["S"]
+                   , optVersion  = False
                    }
 
 -- | @options@ describes the supported command-line arguments
@@ -57,9 +58,9 @@ options =
   , Option ['o'] ["output"]
     (ReqArg (\path opt -> opt {optOutput = writeFile path}) "FILE")
     "Redirect output to FILE."
-  , Option ['s'] ["start"]
-    (ReqArg (\sym opt -> opt {optStart = sym}) "SYMBOL")
-    "Use SYMBOL as the starting symbol (\"S\" is the default.)."
+  , Option ['t'] ["template"]
+    (ReqArg (\syms opt -> opt {optTemplate = splitOn ":" syms}) "SYMBOLS")
+    "Use SYMBOLS as the starting symbols (\"S\" is the default.)."
   , Option ['v'] ["version"]
     (NoArg (\opt -> opt {optVersion = True}))
     "Display version information."
@@ -76,11 +77,11 @@ main = do
     failUsageInfo
 
   let getOptions = foldl ( . ) id actions
-      Options { optHelp    = help
-              , optOutput  = output
-              , optNumber  = number
-              , optStart   = start
-              , optVersion = version
+      Options { optHelp     = help
+              , optOutput   = output
+              , optNumber   = number
+              , optTemplate = template
+              , optVersion  = version
               } = getOptions defaults
 
   when version $ do
@@ -100,9 +101,9 @@ main = do
   case parseCFG description of
     Left  err -> hPutStrLn stderr (show err)
     Right cfg -> do
-      results <- replicateM number (expand cfg start)
+      let expansion = concat <$> mapM (expand cfg) template
+      results <- replicateM number expansion
       output (unlines results)
-
   where
     header = "Usage: babel [OPTION...] GRAMMAR_FILE"
     failUsageInfo = putStrLn (usageInfo header options) >> exitFailure
