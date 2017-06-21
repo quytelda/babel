@@ -60,7 +60,7 @@ executable babel
   -- other-extensions:    
   
   -- Other library packages from which modules are imported.
-  build-depends:       base >=4.7 && <4.10, containers >=0.5 && <0.6, random >=1.1 && <1.2, parsec >=3.1 && <3.2, split >= 0.2 && <2.4
+  build-depends:       base >=4.7 && <4.10, containers >=0.5 && <0.6, random >=1.1 && <1.2, parsec >=3.1 && <3.2, split >= 0.2 && <0.3
   
   -- Directories containing source files.
   hs-source-dirs:      src

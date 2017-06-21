@@ -3,7 +3,7 @@ Babel is a small utility written in Haskell that generates random sequences base
 
 For example:
 ```
-$ ./babel -n 3 grammar.cfg
+$ babel -n 3 grammar.cfg
 abcab
 cba
 bcabcba
@@ -22,5 +22,6 @@ Babel depends on the following haskell packages:
 - containers (>=0.5 && <0.6)
 - random (>=1.1 && <1.2)
 - parsec (>=3.1 && <3.2)
+- split (>= 0.2 && <0.3)
 
 All these packages are available in the repositories for most Linux distributions.
