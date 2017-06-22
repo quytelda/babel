@@ -10,7 +10,7 @@ name:                babel
 -- PVP summary:      +-+------- breaking API changes
 --                   | | +----- non-breaking API additions
 --                   | | | +--- code changes with no API change
-version:             2.0
+version:             2.1.0
 
 -- A short (one-line) description of the package.
 synopsis:            Babel randomly generates character sequences based on context free grammars.

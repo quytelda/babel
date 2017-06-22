@@ -21,15 +21,15 @@ module Main where
 import Control.Monad(when, replicateM)
 import Data.Functor
 import Data.List.Split
+import Data.Version
 import System.Console.GetOpt
 import System.Environment
 import System.Exit (exitSuccess, exitFailure)
 import System.IO
 
 import CFG
-import Version
 
-releaseVersion = Development
+releaseVersion = makeVersion [2, 1, 0]
 
 -- | The Options record holds a representation of the runtime configuration.
 data Options = Options { optHelp     :: Bool
@@ -107,4 +107,5 @@ main = do
       output (unlines results)
   where
     header = "Usage: babel [OPTION...] GRAMMAR_FILE"
+    releaseInfo pgm ver = pgm ++ " " ++ showVersion ver
     failUsageInfo = putStrLn (usageInfo header options) >> exitFailure
