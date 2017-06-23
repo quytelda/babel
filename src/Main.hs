@@ -29,7 +29,7 @@ import System.IO
 
 import CFG
 
-releaseVersion = makeVersion [2, 1, 0]
+releaseVersion = Version [2, 1, 0] []
 
 -- | The Options record holds a representation of the runtime configuration.
 data Options = Options { optHelp     :: Bool
