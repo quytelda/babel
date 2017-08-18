@@ -29,6 +29,7 @@ import System.IO
 
 import CFG
 
+releaseVersion :: Version
 releaseVersion = Version [2, 1, 0] []
 
 -- | The Options record holds a representation of the runtime configuration.
@@ -40,6 +41,7 @@ data Options = Options { optHelp     :: Bool
                        }
 
 -- | @defaults@ is the default runtime configuration record.
+defaults :: Options
 defaults = Options { optHelp     = False
                    , optNumber   = 1
                    , optOutput   = putStrLn

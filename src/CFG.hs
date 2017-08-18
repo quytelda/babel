@@ -42,7 +42,7 @@ terminal symbols -}
 expand :: CFG -> Symbol -> IO String
 expand cfg sym =
   case Map.lookup sym cfg of
-    Just nt -> do
+    Just _ -> do
       symbols <- produce cfg sym
       concat <$> mapM (expand cfg) symbols
     Nothing -> return sym
@@ -55,7 +55,7 @@ pickRIO xs = randomRIO (0, length xs - 1)
 
 {-| Parse a string description of a context free grammer into a CFG type. -}
 parseCFG :: String -> Either ParseError CFG
-parseCFG input = parse cfg "" input
+parseCFG input = parse cfgParse "" input
 
 {-| lexeme parses something with the parser p, ignoring leading and trailing
 whitespace. -}
@@ -92,8 +92,8 @@ rule = do
 {-| cfg parses a string representing a context free grammar in the format of
 line by line rules mapping variables to productions. It returns a dictionary of
 these mappings. -}
-cfg :: Parser CFG
-cfg = do
+cfgParse :: Parser CFG
+cfgParse = do
   rules <- sepEndBy (lexeme rule) endOfLine
   return $ Map.fromList (compress rules [])
   where compress [] a = a
