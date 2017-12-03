@@ -19,7 +19,7 @@
 module Main where
 
 import Control.Monad(when, replicateM)
-import Data.Functor
+import Data.Functor()
 import Data.List.Split
 import Data.Version
 import System.Console.GetOpt
