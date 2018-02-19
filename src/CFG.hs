@@ -26,6 +26,8 @@ import Text.Parsec.Char
 import Text.Parsec.Prim
 import Text.ParserCombinators.Parsec
 
+import Random
+
 type Symbol = String
 type CFG = (Map.Map Symbol [[Symbol]])
 
@@ -34,7 +36,7 @@ produce :: CFG -> Symbol -> IO [Symbol]
 produce cfg sym =
   case Map.lookup sym cfg of
     Just [] -> return []
-    Just ss -> fromJust <$> (pickRIO ss) >>= return
+    Just ss -> fromJust <$> (pickRIO randomRIO ss) >>= return
     _       -> return []
 
 {-| Use a series of random productions to expand a CFG grammer into a set of
@@ -46,12 +48,6 @@ expand cfg sym =
       symbols <- produce cfg sym
       concat <$> mapM (expand cfg) symbols
     Nothing -> return sym
-
-{-| Randomly select an element from a list. -}
-pickRIO :: [a] -> IO (Maybe a)
-pickRIO [] = return Nothing
-pickRIO xs = randomRIO (0, length xs - 1)
-             >>= return . Just . (xs !!)
 
 {-| Parse a string description of a context free grammer into a CFG type. -}
 parseCFG :: String -> Either ParseError CFG
