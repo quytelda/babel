@@ -28,30 +28,30 @@ license:             GPL-3
 license-file:        LICENSE
 
 -- The package author(s).
-author:              Quytelda Kahja
+author: Quytelda Kahja
 
 -- An email address to which users can send suggestions, bug reports, and 
 -- patches.
-maintainer:          quytelda@tamalin.org
+maintainer: quytelda@tamalin.org
 
 -- A copyright notice.
 -- copyright:           
 
-category:            Language
+category: Language
 
-build-type:          Simple
+build-type: Simple
 
 -- Extra files to be distributed with the package, such as examples or a 
 -- README.
-extra-source-files:  ChangeLog.md, README.md
+extra-source-files: ChangeLog.md, README.md
 
 -- Constraint on the version of Cabal needed to build this package.
-cabal-version:       >=1.10
+cabal-version: >=1.10
 
 
 executable babel
   -- .hs or .lhs file containing the Main module.
-  main-is:             Main.hs
+  main-is: Main.hs
   
   -- Modules included in this executable, other than Main.
   other-modules: CFG
@@ -60,14 +60,14 @@ executable babel
   -- other-extensions:    
   
   -- Other library packages from which modules are imported.
-  build-depends:       base >=4.7, containers >=0.5, random >=1.1, parsec >=3.1, split >= 0.2
+  build-depends: base >=4.7, containers >=0.5, random >=1.1, parsec >=3.1, split >= 0.2
   ghc-options: -dynamic -Wall
   
   -- Directories containing source files.
-  hs-source-dirs:      src
+  hs-source-dirs: src
   
   -- Base language which the package is written in.
-  default-language:    Haskell2010
+  default-language: Haskell2010
   
 source-repository head
   type: git
