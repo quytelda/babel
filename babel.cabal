@@ -2,73 +2,66 @@
 --  see http://haskell.org/cabal/users-guide/
 
 -- The name of the package.
-name:                babel
-
--- The package version.  See the Haskell package versioning policy (PVP) 
--- for standards guiding when and how versions should be incremented.
--- https://wiki.haskell.org/Package_versioning_policy
--- PVP summary:      +-+------- breaking API changes
---                   | | +----- non-breaking API additions
---                   | | | +--- code changes with no API change
-version:             2.1.0
+name: babel
+version: 2.1.0
 
 -- A short (one-line) description of the package.
-synopsis:            Babel randomly generates character sequences based on context free grammars.
+synopsis: Babel randomly generates character sequences based on context free grammars.
 
 -- A longer description of the package.
-description:         Babel randomly generates character sequences based on context free grammars.  It can be used to generate words, passwords, or codes.
+description: Babel randomly generates character sequences based on context free grammars.  It can be used to generate words, passwords, or codes.
 
 -- URL for the project homepage or repository.
-homepage:            https://tamalin.org/quytelda/babel
+homepage: https://tamalin.org/quytelda/babel
 
 -- The license under which the package is released.
-license:             GPL-3
+license: GPL-3
 
 -- The file containing the license text.
-license-file:        LICENSE
+license-file: LICENSE
 
 -- The package author(s).
-author:              Quytelda Kahja
+author: Quytelda Kahja
 
--- An email address to which users can send suggestions, bug reports, and 
+-- An email address to which users can send suggestions, bug reports, and
 -- patches.
-maintainer:          quytelda@tamalin.org
+maintainer: quytelda@tamalin.org
 
 -- A copyright notice.
--- copyright:           
+-- copyright:
 
-category:            Language
+category: Language
 
-build-type:          Simple
+build-type: Simple
 
--- Extra files to be distributed with the package, such as examples or a 
+-- Extra files to be distributed with the package, such as examples or a
 -- README.
-extra-source-files:  ChangeLog.md, README.md
+extra-source-files: ChangeLog.md, README.md
 
 -- Constraint on the version of Cabal needed to build this package.
-cabal-version:       >=1.10
+cabal-version: >=1.10
 
 
 executable babel
   -- .hs or .lhs file containing the Main module.
-  main-is:             Main.hs
-  
+  main-is: Main.hs
+
   -- Modules included in this executable, other than Main.
   other-modules: CFG
-  
+
   -- LANGUAGE extensions used by modules in this package.
-  -- other-extensions:    
-  
+  -- other-extensions:
+
   -- Other library packages from which modules are imported.
-  build-depends:       base >=4.7, containers >=0.5, random >=1.1, parsec >=3.1, split >= 0.2
+  build-depends: base >=4.7, containers >=0.5, random >=1.1, parsec >=3.1, split >= 0.2
   ghc-options: -dynamic -Wall
-  
+
   -- Directories containing source files.
-  hs-source-dirs:      src
-  
+  hs-source-dirs: src
+
   -- Base language which the package is written in.
-  default-language:    Haskell2010
-  
+  default-language: Haskell2010
+
 source-repository head
   type: git
   location: git://github.com/quytelda/babel.git
