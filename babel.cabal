@@ -54,7 +54,7 @@ executable babel
 
   -- Other library packages from which modules are imported.
   build-depends: base >=4.7, containers >=0.5, random >=1.1, parsec >=3.1,
-                 split >= 0.2, cryptonite >= 0.24
+                 split >= 0.2, cryptonite >= 0.17
   ghc-options: -dynamic -Wall
 
   -- Directories containing source files.
