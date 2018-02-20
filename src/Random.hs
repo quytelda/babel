@@ -13,3 +13,8 @@ pickRIO randRange xs = let min = 0
                            max = length xs - 1
                        in randRange (min, max)
                           >>= return . Just . (xs !!)
+
+randomCryptIO :: (Random a, Integral a) => (a, a) -> IO a
+randomCryptIO (low, hi) = do
+  integer <- generateBetween (toInteger low) (toInteger hi)
+  return (fromIntegral integer)
