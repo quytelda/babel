@@ -36,6 +36,7 @@ releaseVersion = Version [2, 1, 0] []
 data Options = Options { optHelp     :: Bool
                        , optNumber   :: Int
                        , optOutput   :: (String -> IO ())
+                       , optCrypt    :: Bool
                        , optTemplate :: [Symbol]
                        , optVersion  :: Bool
                        }
@@ -45,6 +46,7 @@ defaults :: Options
 defaults = Options { optHelp     = False
                    , optNumber   = 1
                    , optOutput   = putStrLn
+                   , optCrypt    = False
                    , optTemplate = ["S"]
                    , optVersion  = False
                    }
@@ -61,6 +63,9 @@ options =
   , Option ['o'] ["output"]
     (ReqArg (\path opt -> opt {optOutput = writeFile path}) "FILE")
     "Redirect output to FILE."
+  , Option ['c'] ["crypto"]
+    (NoArg (\opt -> opt {optCrypt = True}))
+    "Use cryptographically secure random expansion."
   , Option ['t'] ["template"]
     (ReqArg (\syms opt -> opt {optTemplate = splitOn ":" syms}) "SYMBOLS")
     "Use SYMBOLS as the starting symbols (\"S\" is the default.)."
@@ -82,6 +87,7 @@ main = do
   let getOptions = foldl ( . ) id actions
       Options { optHelp     = help
               , optOutput   = output
+              , optCrypt    = crypt
               , optNumber   = number
               , optTemplate = template
               , optVersion  = version
