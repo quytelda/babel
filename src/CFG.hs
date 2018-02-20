@@ -18,7 +18,6 @@
 
 module CFG (produce, expand, parseCFG, Symbol) where
 
-import Data.Functor
 import Data.Maybe (fromJust)
 import qualified Data.Map as Map
 import System.Random
