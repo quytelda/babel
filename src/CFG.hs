@@ -1,3 +1,4 @@
+{-# LANGUAGE RecordWildCards #-}
 -- CFG.hs -- Context Free Grammar representation, parsing, and application.
 -- Copyright (C) 2017 Quytelda Kahja <quytelda@tamalin.org>
 --
@@ -29,12 +30,14 @@ import Text.ParserCombinators.Parsec
 import Random
 
 type Symbol = String
-type CFG = (Map.Map Symbol [[Symbol]])
+data CFG = CFG { crypto :: Bool
+               , cfgMap :: (Map.Map Symbol [[Symbol]])
+               }
 
 {-| Follow a single production, randomly selecting between alternative rules. -}
 produce :: CFG -> Symbol -> IO [Symbol]
-produce cfg sym =
-  case Map.lookup sym cfg of
+produce cfg@CFG{..} sym =
+  case Map.lookup sym cfgMap of
     Just [] -> return []
     Just ss -> fromJust <$> (pickRIO randomRIO ss) >>= return
     _       -> return []
@@ -42,16 +45,16 @@ produce cfg sym =
 {-| Use a series of random productions to expand a CFG grammer into a set of
 terminal symbols -}
 expand :: CFG -> Symbol -> IO String
-expand cfg sym =
-  case Map.lookup sym cfg of
+expand cfg@CFG{..} sym =
+  case Map.lookup sym cfgMap of
     Just _ -> do
       symbols <- produce cfg sym
       concat <$> mapM (expand cfg) symbols
     Nothing -> return sym
 
 {-| Parse a string description of a context free grammer into a CFG type. -}
-parseCFG :: String -> Either ParseError CFG
-parseCFG input = parse cfgParse "" input
+parseCFG :: Bool -> String -> Either ParseError CFG
+parseCFG crypto input = parse (cfgParse crypto) "" input
 
 {-| lexeme parses something with the parser p, ignoring leading and trailing
 whitespace. -}
@@ -85,13 +88,16 @@ rule = do
   alt <- alternates
   return (var, alt)
 
-{-| cfg parses a string representing a context free grammar in the format of
-line by line rules mapping variables to productions. It returns a dictionary of
-these mappings. -}
-cfgParse :: Parser CFG
-cfgParse = do
+{-| cfgParse parses a string representing a context free grammar in the format
+of line by line rules mapping variables to productions. It returns a dictionary
+of these mappings. -}
+cfgParse :: Bool -> Parser CFG
+cfgParse crypto = do
   rules <- sepEndBy (lexeme rule) endOfLine
-  return $ Map.fromList (compress rules [])
+  let cfgMap = Map.fromList (compress rules [])
+
+  return $ CFG crypto cfgMap
+
   where compress [] a = a
         compress (r@(var, ss) : rs) a =
           case lookup var a of
