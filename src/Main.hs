@@ -107,7 +107,7 @@ main = do
 
   -- Load the grammar file
   description <- readFile (head params)
-  case parseCFG description of
+  case parseCFG crypt description of
     Left  err -> hPutStrLn stderr (show err)
     Right cfg -> do
       let expansion = concat <$> mapM (expand cfg) template
