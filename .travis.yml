@@ -2,3 +2,8 @@ sudo: false
 
 language: haskell
 ghc: 8.0
+
+# cache cabal build depends
+cache:
+  directories:
+  - $HOME/.cabal
