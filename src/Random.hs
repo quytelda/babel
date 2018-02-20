@@ -6,7 +6,7 @@ import Crypto.Number.Generate
 function randRange.  randRange must be able to select a random Int
 from a provided range.
 If the list is empty, this function returns Nothing. -}
-pickRIO :: (Monad  m) => ((Int, Int) -> m Int) -> [a] -> m (Maybe a)
+pickRIO :: Monad m => ((Int, Int) -> m Int) -> [a] -> m (Maybe a)
 pickRIO _         [] = return Nothing
 pickRIO randRange xs = let minI = 0
                            maxI = length xs - 1
