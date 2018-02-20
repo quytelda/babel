@@ -33,6 +33,16 @@ data CFG = CFG { crypto :: Bool
                , cfgMap :: (Map.Map Symbol [[Symbol]])
                }
 
+{-| Use a series of random productions to expand a CFG grammer into a set of
+terminal symbols -}
+expand :: CFG -> Symbol -> IO String
+expand cfg@CFG{..} sym =
+  case Map.lookup sym cfgMap of
+    Just _ -> do
+      symbols <- produce cfg sym
+      concat <$> mapM (expand cfg) symbols
+    Nothing -> return sym
+
 {-| Follow a single production, randomly selecting between alternative rules. -}
 produce :: CFG -> Symbol -> IO [Symbol]
 produce CFG{..} sym =
@@ -43,16 +53,6 @@ produce CFG{..} sym =
   where chooser = if crypto
                   then randomCryptIO
                   else randomRIO
-
-{-| Use a series of random productions to expand a CFG grammer into a set of
-terminal symbols -}
-expand :: CFG -> Symbol -> IO String
-expand cfg@CFG{..} sym =
-  case Map.lookup sym cfgMap of
-    Just _ -> do
-      symbols <- produce cfg sym
-      concat <$> mapM (expand cfg) symbols
-    Nothing -> return sym
 
 {-| Parse a string description of a context free grammer into a CFG type. -}
 parseCFG :: Bool -> String -> Either ParseError CFG
@@ -96,8 +96,8 @@ of these mappings. -}
 cfgParse :: Bool -> Parser CFG
 cfgParse crypto = do
   rules <- sepEndBy (lexeme rule) endOfLine
-  let cfgMap = Map.fromList (compress rules [])
 
+  let cfgMap = Map.fromList (compress rules [])
   return $ CFG crypto cfgMap
 
   where compress [] a = a
