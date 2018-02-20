@@ -35,7 +35,7 @@ data CFG = CFG { crypto :: Bool
 
 {-| Follow a single production, randomly selecting between alternative rules. -}
 produce :: CFG -> Symbol -> IO [Symbol]
-produce cfg@CFG{..} sym =
+produce CFG{..} sym =
   case Map.lookup sym cfgMap of
     Just [] -> return []
     Just ss -> fromJust <$> (pickRIO chooser ss) >>= return

@@ -8,10 +8,10 @@ function randRange.  randRange must be able to select a random Int
 from a provided range.
 If the list is empty, this function returns Nothing. -}
 pickRIO :: (Monad  m) => ((Int, Int) -> m Int) -> [a] -> m (Maybe a)
-pickRIO randRange [] = return Nothing
-pickRIO randRange xs = let min = 0
-                           max = length xs - 1
-                       in randRange (min, max)
+pickRIO _         [] = return Nothing
+pickRIO randRange xs = let minI = 0
+                           maxI = length xs - 1
+                       in randRange (minI, maxI)
                           >>= return . Just . (xs !!)
 
 randomCryptIO :: (Random a, Integral a) => (a, a) -> IO a
