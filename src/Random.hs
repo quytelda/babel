@@ -13,7 +13,9 @@ pickRIO randRange xs = let minI = 0
                        in randRange (minI, maxI)
                           >>= return . Just . (xs !!)
 
+{-| A cryptographically secure version of 'System.Random.randomRIO'.
+'randomCryptIO' generates a random number on the interval ['lo', 'hi']. -}
 randomCryptIO :: Integral a => (a, a) -> IO a
-randomCryptIO (low, hi) = do
-  integer <- generateBetween (toInteger low) (toInteger hi)
+randomCryptIO (lo, hi) = do
+  integer <- generateBetween (toInteger lo) (toInteger hi)
   return (fromIntegral integer)
