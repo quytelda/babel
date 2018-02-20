@@ -39,8 +39,11 @@ produce :: CFG -> Symbol -> IO [Symbol]
 produce cfg@CFG{..} sym =
   case Map.lookup sym cfgMap of
     Just [] -> return []
-    Just ss -> fromJust <$> (pickRIO randomRIO ss) >>= return
+    Just ss -> fromJust <$> (pickRIO chooser ss) >>= return
     _       -> return []
+  where chooser = if crypto
+                  then randomCryptIO
+                  else randomRIO
 
 {-| Use a series of random productions to expand a CFG grammer into a set of
 terminal symbols -}
@@ -106,5 +109,3 @@ cfgParse crypto = do
                   a' = filter (\x -> var /= fst x) a
               in compress rs (r' : a')
             _         -> compress rs (r : a)
-
-
