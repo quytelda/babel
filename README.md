@@ -16,12 +16,9 @@ B -> b A | b C | b
 C -> c A | c B | c
 ```
 # What's Needed
-In order to build babel, you must at least have the haskell compiler GHC.  If you have Cabal installed, just run `cabal build` from the top level directory (where babel.cabal is located).  Otherwise, you can compile an executable by running `ghc -o babel --make -isrc src/Main.hs`.
+In order to build babel, you must at least have the haskell compiler GHC 8.0+.  If you have Cabal installed, just run `cabal build` from the top level directory (where babel.cabal is located).  Otherwise, you can compile an executable by running `ghc -o babel --make -isrc src/Main.hs`.
 
 Babel depends on the following haskell packages:
-- containers (>=0.5 && <0.6)
-- random (>=1.1 && <1.2)
-- parsec (>=3.1 && <3.2)
-- split (>= 0.2 && <0.3)
+base >=4.7, containers >=0.5, random >=1.1, parsec >=3.1, split >= 0.2, cryptonite >= 0.17
 
 All these packages are available in the repositories for most Linux distributions.
