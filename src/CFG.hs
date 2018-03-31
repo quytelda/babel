@@ -19,6 +19,7 @@
 
 module CFG (produce, expand, parseCFG, Symbol) where
 
+import Data.List (intersperse)
 import Data.Maybe (fromJust)
 import qualified Data.Map as Map
 import System.Random
@@ -32,6 +33,14 @@ type Symbol = String
 data CFG = CFG { crypto :: Bool
                , cfgMap :: (Map.Map Symbol [[Symbol]])
                }
+
+instance Show CFG where
+  {-| Convert a CFG record into a String.  Each line will show an individual rule
+  in the format SYMBOL -> A B C | D E F | ... -}
+  show CFG{..} = unlines $ map showRule (Map.toList cfgMap)
+    where showRule (sym, subs) = "'" ++ sym ++ " -> " ++ (showSubs subs) ++ "'"
+          showSubs subs = concat $ (intersperse " | ") (joinAlts subs)
+          joinAlts subs = map (concat . intersperse " ") subs
 
 {-| Use a series of random productions to expand a CFG grammer into a set of
 terminal symbols -}

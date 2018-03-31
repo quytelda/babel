@@ -36,6 +36,7 @@ data Options = Options { optHelp     :: Bool
                        , optNumber   :: Int
                        , optOutput   :: (String -> IO ())
                        , optCrypt    :: Bool
+                       , optDumpTree :: Bool
                        , optTemplate :: [Symbol]
                        , optVersion  :: Bool
                        }
@@ -46,6 +47,7 @@ defaults = Options { optHelp     = False
                    , optNumber   = 1
                    , optOutput   = putStrLn
                    , optCrypt    = False
+                   , optDumpTree = False
                    , optTemplate = ["S"]
                    , optVersion  = False
                    }
@@ -65,6 +67,9 @@ options =
   , Option ['c'] ["crypto"]
     (NoArg (\opt -> opt {optCrypt = True}))
     "Use cryptographically secure random expansion."
+  , Option ['d'] ["dump-tree"]
+    (NoArg (\opt -> opt {optDumpTree = True}))
+    "Dump the CFG symbol tree."
   , Option ['t'] ["template"]
     (ReqArg (\syms opt -> opt {optTemplate = splitOn ":" syms}) "SYMBOLS")
     "Use SYMBOLS as the starting symbols (\"S\" is the default.)."
@@ -87,6 +92,7 @@ main = do
       Options { optHelp     = help
               , optOutput   = output
               , optCrypt    = crypt
+              , optDumpTree = dumpTree
               , optNumber   = number
               , optTemplate = template
               , optVersion  = version
@@ -109,6 +115,7 @@ main = do
   case parseCFG crypt description of
     Left  err -> hPutStrLn stderr (show err)
     Right cfg -> do
+      when dumpTree (putStrLn $ show cfg)
       let expansion = concat <$> mapM (expand cfg) template
       results <- replicateM number expansion
       output (unlines results)
