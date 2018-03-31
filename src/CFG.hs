@@ -19,6 +19,7 @@
 
 module CFG (produce, expand, parseCFG, Symbol) where
 
+import Data.Char (isSpace)
 import Data.List (intersperse)
 import Data.Maybe (fromJust)
 import qualified Data.Map as Map
@@ -63,9 +64,19 @@ produce CFG{..} sym =
                   then randomCryptIO
                   else randomRIO
 
+{-| Removes syntactically null content from a CFG definition file, such as
+comments, empty lines, and blank lines. -}
+stripNulls :: String -> String
+stripNulls text = let origLines  = lines text
+                      tmpLines   = map dropComment origLines
+                      cleanLines = filter (not . isBlankLine) tmpLines
+                  in unlines cleanLines
+  where dropComment = takeWhile (/= '#')
+        isBlankLine = all isSpace
+
 {-| Parse a string description of a context free grammer into a CFG type. -}
 parseCFG :: Bool -> String -> Either ParseError CFG
-parseCFG crypto input = parse (cfgParse crypto) "" input
+parseCFG crypto input = parse (cfgParse crypto) "" (stripNulls input)
 
 {-| lexeme parses something with the parser p, ignoring leading and trailing
 whitespace. -}
