@@ -78,13 +78,16 @@ stripNulls text = let origLines  = lines text
 parseCFG :: Bool -> String -> Either ParseError CFG
 parseCFG crypto input = parse (cfgParse crypto) "" (stripNulls input)
 
+skipWhitespace :: Parser ()
+skipWhitespace = skipMany (oneOf " \t")
+
 {-| lexeme parses something with the parser p, ignoring leading and trailing
 whitespace. -}
 lexeme :: Parser a -> Parser a
 lexeme p = do
-  _ <- skipMany (oneOf " \t")
+  skipWhitespace
   result <- p
-  _ <- skipMany (oneOf " \t")
+  skipWhitespace
   return result
 
 {-| symbol parses a string of characters until it reaches whitespace or a
